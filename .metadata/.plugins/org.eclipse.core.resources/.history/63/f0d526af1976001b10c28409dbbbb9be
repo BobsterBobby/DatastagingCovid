@@ -1,0 +1,12 @@
+package com.covid19.datastaging;
+
+public class Covid19Datastaging {
+
+	
+	
+	public static void main(String[] args) {
+		
+		
+	}
+
+}
