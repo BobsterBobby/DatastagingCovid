@@ -1,0 +1,64 @@
+package com.covid19.datastaging;
+
+/*import java.io.BufferedReader;*/
+import java.io.File;
+/*import java.io.FileReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;*/
+import java.util.Scanner;
+
+
+public class MissingValueHandler {
+
+	public static String[][] csvFileReader(String filePath) throws Exception{
+		String[][] result = null;
+		String[] type = null;
+		int length = 0;
+		Scanner sc = new Scanner(new File(filePath));
+		
+		String v = "";
+		for(int i = 0; sc.hasNextLine(); i++) {
+			v = sc.nextLine();
+			type[i] = (v == null)? "N/A" : v;
+		}
+		length = type[0].split(",").length;
+		result = new String[length][];
+		for(int i = 0; i < type.length; i++) {
+			result[i] = type[i].split(",");
+		}
+		
+		/*type = sc.nextLine().split(",");
+		for (String i:type) System.out.println(i);
+		length = type.length;
+		result = new String[][];
+		result[0] = type;
+		int j = 1;
+		String v;
+		while (sc.hasNextLine()) {
+			for (int i = 0; i < length-1; i++) {
+				v = sc.next();
+				result[i][j] = v;
+				System.out.print(v); 
+			}
+			j++;
+		}*/
+		sc.close();
+		return result;
+	}
+	
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		String[][] csvData = null;
+		try {
+			csvData = csvFileReader ("./resources/Mobility_dimension_CSV.csv");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(csvData.toString());
+	}
+
+}
