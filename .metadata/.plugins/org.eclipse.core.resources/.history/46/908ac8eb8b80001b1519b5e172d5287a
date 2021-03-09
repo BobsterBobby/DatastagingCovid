@@ -1,0 +1,49 @@
+package com.covid19.datastaging;
+
+/*import java.io.BufferedReader;*/
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+/*import java.io.FileReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;*/
+import java.util.Scanner;
+
+
+public class MissingValueHandler {
+
+	public static String[][] csvFileReader(String filePath) throws Exception{
+		Scanner sc = new Scanner(new File(filePath));
+		
+		List<String[]> lines = new ArrayList<String[]>();
+		while (sc.hasNextLine()) {
+		     lines.add(sc.nextLine().split(","));
+		}
+
+		// convert our list to a String array.
+		String[][] array = new String[lines.size()][0];
+		lines.toArray(array);
+		
+		sc.close();
+		return array;
+	}
+	
+	public static void main(String[] args) {
+		String[][] csvData = null;
+		try {
+			csvData = csvFileReader ("./resources/Mobility_dimension_CSV.csv");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		for (String[] i : csvData) {
+			for (String j : i) {
+				System.out.print(j+ " ");
+			}
+			System.out.println("");
+		}
+	}
+
+}
