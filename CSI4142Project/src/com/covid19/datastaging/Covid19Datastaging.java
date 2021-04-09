@@ -14,7 +14,7 @@ public class Covid19Datastaging {
 		
 		String serverURL = args[0];
 		String dbUser = args[1];
-		String password = args[2];
+		String password = args[2];// TODO: add file argument instead of auto chosing 
 		
 		if (serverURL == null) {
 			
