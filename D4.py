@@ -1,3 +1,4 @@
+
 # This gist contains a direct connection to a local PostgreSQL database
 # called "suppliers" where the username and password parameters are "postgres"
 
@@ -7,27 +8,15 @@
 import psycopg2
 import time
 import math
-import pandas
+import pandas as pd
 import sklearn
-
-# Establish a connection to the database by creating a cursor object
-# The PostgreSQL server must be accessed through the PostgreSQL APP or Terminal Shell
-
-# conn = psycopg2.connect("dbname=suppliers port=5432 user=postgres password=postgres")
-
-# Or:
-conn = psycopg2.connect(host="www.eecs.uottawa.ca", port = 15432, database="apose046", user="apose046", password="Campus4711")
-
-# Create a cursor object
-cur = conn.cursor()
-
-# A sample query of all data from the "vendors" table in the "suppliers" database
- #print("PostgreSQL server information")
- #print(connection.get_dsn_parameters(), "\n")
-#cur.execute("""SELECT * FROM public.special_measures_dimension sm""")
-#query_results = cur.fetchall()
-#print(query_results)
-
+from sklearn import model_selection
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import precision_score
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import recall_score
+from sklearn.model_selection import StratifiedShuffleSplit
+"""
 # Decision Tree 
 def decisiontree(queryData):
     startTime = time.time()
@@ -56,7 +45,6 @@ def decisiontree(queryData):
     #TODO get percision
     #TODO get recall
 
-
 # Gradient Boosting    
 def GradientBoosting(queryData):
     querySize = len(queryData)
@@ -75,41 +63,74 @@ def GradientBoosting(queryData):
     #TODO get accuracy
     #TODO get percision
     #TODO get recall
-
+"""
 
 # Random Forest
-def RandomForrest(queryData):
-    querySize = len(queryData)
-    startTime = time.time()
+def RandomForest(queryData):
     #classiffier
-    X_train, X_test = X[:math.floor(querySize*0.66)], X[math.floor(querySize*0.66):]
-    y_train, y_test = y[:math.floor(querySize*0.66)], y[math.floor(querySize*0.66):]
+    y = queryData['resolved']
+    X = queryData.drop(['resolved'], axis = 1)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size = 0.34, random_state=0, stratify = y)
+    # stratSplit = StratifiedShuffleSplit(y, test_size=0.34, random_state=101)
+    # for train_id, test_id in stratSplit:
+    #     X_train=X[train_id]
+    #     y_train=y[train_id]
+
+    print("\n========== Training Random Forest ==========\n")
     
-    """
-    #this instead of the lines above, this all assumes data is imported and in the format of a panda file
-    y = data['resolved']#get the list of the resolved column
-    X = data.drop(['resolved'], axis = 1)
-    X_train, Xtest, y_train, y_test = sklearn.model_selection.train_test_split(X, y test_size = 0.34, random_state=101)
+    startTime = time.time()
     randForest = RandomForestClassifier()
-    randForest.fit(X_train,ytrain)
+    randForest.fit(X_train,y_train)
+    endTime = time.time()
+    
+    # Calculate Math
+    totalTime = endTime - startTime
     train_acc = randForest.score(X_train,y_train)#get accuracy of train
     test_acc = randForest.score(X_test,y_test)#get accuracy of test
-    percision = sklearn.metrics.precision_score(y_test,randForest, agerage = 'micro')
-    recall = sklearn.metrics.recall_score(y_test,randForest, agerage = 'micro')
-    """
 
-    X, y = sklearn.ensemble.make_classification(n_samples=1000, n_features=4, n_informative=2, n_redundant=0, random_state=0, shuffle=False)
-    clf = sklearn.ensemble.RandomForestClassifier()#possible parameters (max_depth=2, random_state=0)
-    clf = clf.fit(X, y)
-    clf.predict
+    y_pred = randForest.predict(X_test)
+    precision = precision_score(y_test, y_pred, average = 'micro')#get precision of test
+    recall = recall_score(y_test,y_pred, average = 'micro')#get recall of test
     
-    endTime = time.time()
-    totalTime = endTime - startTime
-    #TODO get accuracy
-    #TODO get percision
-    #TODO get recall
+    print("Random Forest Results\n========================")
+    print("Training Accuracy: ", train_acc)
+    print("Test Accuracy: ", test_acc)
+    print("Precision Score: ", precision)
+    print("Recall Score: ", recall)
+    print("Total Elapsed Time in s: ", totalTime)
 
-# Close the cursor and connection to so the server can allocate
-# bandwidth to other requests
-cur.close()
-conn.close()
+def main():
+    #create connection to database
+    credentials = "postgresql://apose046:Campus4711@www.eecs.uottawa.ca:15432/apose046"
+
+    #create qul query
+    dataframe = pd.read_sql("""
+                SELECT d.month, d.day, mb.parks, mb.transit_stations, w.daily_low_temp, w.daily_high_temp, w.precipitation, ft.resolved 
+                FROM public.covid19_fact_table ft, public.date_dimension d, public.weather_dimension w,
+                public.mobility_dimension mb
+                WHERE ft.reported_date_id = d.date_id AND ft.weather_id = w.weather_id AND 
+                ft.mobility_id = mb.mobility_id
+                """, con = credentials)
+
+    # Convert months into number months
+    dataframe = dataframe.replace('January', 1)
+    dataframe = dataframe.replace('February', 2)
+    dataframe = dataframe.replace('March', 3)
+    dataframe = dataframe.replace('April', 4)
+    dataframe = dataframe.replace('May', 5)
+    dataframe = dataframe.replace('June', 6)
+    dataframe = dataframe.replace('July', 7)
+    dataframe = dataframe.replace('August', 8)
+    dataframe = dataframe.replace('September', 9)
+    dataframe = dataframe.replace('October', 10)
+    dataframe = dataframe.replace('November', 11)
+    dataframe = dataframe.replace('December', 12)
+    dataframe = dataframe.dropna(how='any',axis=0) #remove NaN
+    #We need to get equal number of yes and no
+
+    # print(dataframe.head())
+
+    #start of testing models
+    RandomForest(dataframe)
+
+main()
