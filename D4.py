@@ -12,20 +12,38 @@ import pandas as pd
 import sklearn
 from sklearn import model_selection
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import precision_score
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import recall_score
 from sklearn.model_selection import StratifiedShuffleSplit
-"""
-# Decision Tree 
-def decisiontree(queryData):
-    startTime = time.time()
-    
-    col_names = ['reported_date','phu_name','resolved']
-    
-    # load dataset from database
-    pima = pd.read_csv("pima-indians-diabetes.csv", header=None, names=col_names)
 
+# Decision Tree 
+def DecisionTree(queryData):
+
+    #classiffier
+    y = queryData['resolved']
+    X = queryData.drop(['resolved'], axis = 1)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size = 0.34, random_state=0, stratify = y)
+    
+    print("\n========== Training Decision Tree ==========\n")
+    
+    startTime = time.time()
+    DT = DecisionTreeClassifier()
+    DT = DT.fit(X_train,y_train)
+    #randForest.fit(X_train,y_train)
+    endTime = time.time()
+
+    # Calculate Math
+    totalTime = endTime - startTime
+    train_acc = DT.score(X_train,y_train)#get accuracy of train
+    test_acc = DT.score(X_test,y_test)#get accuracy of test
+
+    y_pred = DT.predict(X_test)
+    precision = precision_score(y_test, y_pred, average = 'micro')#get precision of test
+    recall = recall_score(y_test,y_pred, average = 'micro')#get recall of test
+
+    """
     # Create Decision Tree classifer object
     clf = DecisionTreeClassifier()
 
@@ -37,14 +55,16 @@ def decisiontree(queryData):
 
     # Model Accuracy, how often is the classifier correct?
     print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+    """
     
-    
-    endTime = time.time()
-    totalTime = endTime - startTime
-    #TODO get accuracy
-    #TODO get percision
-    #TODO get recall
+    print("Decision Tree Results\n========================")
+    print("Training Accuracy: ", train_acc)
+    print("Test Accuracy: ", test_acc)
+    print("Precision Score: ", precision)
+    print("Recall Score: ", recall)
+    print("Total Elapsed Time in s: ", totalTime)
 
+"""
 # Gradient Boosting    
 def GradientBoosting(queryData):
     querySize = len(queryData)
@@ -100,9 +120,12 @@ def RandomForest(queryData):
     print("Total Elapsed Time in s: ", totalTime)
 
 def main():
+
+    print("\n========== Connecting to Database ==========\n")
     #create connection to database
     credentials = "postgresql://apose046:Campus4711@www.eecs.uottawa.ca:15432/apose046"
 
+    print("\n========== Creating Dataframe ==========\n")
     #create qul query
     dataframe = pd.read_sql("""
                 SELECT d.month, d.day, mb.parks, mb.transit_stations, w.daily_low_temp, w.daily_high_temp, w.precipitation, ft.resolved 
@@ -131,6 +154,13 @@ def main():
     # print(dataframe.head())
 
     #start of testing models
+    
+    print("\n========== Testing Decision Tree Model ==========\n")
+    DecisionTree(dataframe)
+    print("\n========== Finished Decision Tree Testing ==========\n")
+
+    print("\n========== Testing Random Forest Model ==========\n")
     RandomForest(dataframe)
+    print("\n========== Finished Random Forest Testing ==========\n")
 
 main()
