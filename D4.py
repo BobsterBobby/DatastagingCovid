@@ -12,6 +12,7 @@ import pandas as pd
 import sklearn
 from sklearn import model_selection
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import precision_score
 from sklearn.metrics import accuracy_score
@@ -24,14 +25,13 @@ def DecisionTree(queryData):
     #classiffier
     y = queryData['resolved']
     X = queryData.drop(['resolved'], axis = 1)
-    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size = 0.34, random_state=0, stratify = y)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size = 0.20, random_state=80, stratify = y)
     
     print("\n========== Training Decision Tree ==========\n")
     
     startTime = time.time()
     DT = DecisionTreeClassifier()
     DT = DT.fit(X_train,y_train)
-    #randForest.fit(X_train,y_train)
     endTime = time.time()
 
     # Calculate Math
@@ -64,33 +64,45 @@ def DecisionTree(queryData):
     print("Recall Score: ", recall)
     print("Total Elapsed Time in s: ", totalTime)
 
-"""
+
 # Gradient Boosting    
 def GradientBoosting(queryData):
-    querySize = len(queryData)
+
+    #classiffier
+    y = queryData['resolved']
+    X = queryData.drop(['resolved'], axis = 1)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size = 0.20, random_state=0, stratify = y)
+    
+    print("\n========== Training Gradient Boosting Model ==========\n")
+    
     startTime = time.time()
-    #classifier
-    X, y = sklearn.datasets.make_hastie_10_2(random_state=0)
-    qSeperator = int(math.floor(querySize*0.70))
-    X_train, X_test = X[:qSeperator], X[qSeperator:]
-    y_train, y_test = y[:qSeperator], y[qSeperator:]
-
-    clf = GradientBoostingClassifier(n_estimators=100, learning_rate=1.0, max_depth=1, random_state=0).fit(X_train, y_train)
-    clfScore = clf.score(X_test, y_test)
-
+    GB = GradientBoostingClassifier(n_estimators=100, learning_rate=1.0,max_depth=1, random_state=0).fit(X_train, y_train)
+    #DT = DT.fit(X_train,y_train)
+    #randForest.fit(X_train,y_train)
     endTime = time.time()
+
+    # Calculate Math
     totalTime = endTime - startTime
-    #TODO get accuracy
-    #TODO get percision
-    #TODO get recall
-"""
+    train_acc = GB.score(X_train,y_train)#get accuracy of train
+    test_acc = GB.score(X_test,y_test)#get accuracy of test
+
+    y_pred = GB.predict(X_test)
+    precision = precision_score(y_test, y_pred, average = 'micro')#get precision of test
+    recall = recall_score(y_test,y_pred, average = 'micro')#get recall of test
+    
+    print("Gradient Boosting Results\n========================")
+    print("Training Accuracy: ", train_acc)
+    print("Test Accuracy: ", test_acc)
+    print("Precision Score: ", precision)
+    print("Recall Score: ", recall)
+    print("Total Elapsed Time in s: ", totalTime)
 
 # Random Forest
 def RandomForest(queryData):
     #classiffier
     y = queryData['resolved']
     X = queryData.drop(['resolved'], axis = 1)
-    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size = 0.34, random_state=0, stratify = y)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size = 0.20, random_state=0, stratify = y)
     # stratSplit = StratifiedShuffleSplit(y, test_size=0.34, random_state=101)
     # for train_id, test_id in stratSplit:
     #     X_train=X[train_id]
@@ -158,6 +170,10 @@ def main():
     print("\n========== Testing Decision Tree Model ==========\n")
     DecisionTree(dataframe)
     print("\n========== Finished Decision Tree Testing ==========\n")
+
+    print("\n========== Testing Gradient Boosting Model ==========\n")
+    GradientBoosting(dataframe)
+    print("\n========== Finished Gradient Boosting Testing ==========\n")
 
     print("\n========== Testing Random Forest Model ==========\n")
     RandomForest(dataframe)
