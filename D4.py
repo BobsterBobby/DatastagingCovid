@@ -25,12 +25,12 @@ def DecisionTree(queryData):
     #classiffier
     y = queryData['resolved']
     X = queryData.drop(['resolved'], axis = 1)
-    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size = 0.20, random_state=80, stratify = y)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size = 0.20, random_state=0, stratify = y)
     
     print("\n========== Training Decision Tree ==========\n")
     
     startTime = time.time()
-    DT = DecisionTreeClassifier()
+    DT = DecisionTreeClassifier(random_state=0)
     DT = DT.fit(X_train,y_train)
     endTime = time.time()
 
@@ -101,7 +101,7 @@ def RandomForest(queryData):
     #classiffier
     y = queryData['resolved']
     X = queryData.drop(['resolved'], axis = 1)
-    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size = 0.20, random_state=0, stratify = y)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size = 0.20, random_state=80, stratify = y)
 
     print("\n========== Training Random Forest ==========\n")
     
@@ -118,6 +118,7 @@ def RandomForest(queryData):
     y_pred = randForest.predict(X_test)
     precision = precision_score(y_test, y_pred, average = 'macro')#get precision of test
     recall = recall_score(y_test,y_pred, average = 'macro')#get recall of test
+    
     
     print("Random Forest Results\n========================")
     print("Training Accuracy: ", train_acc)
