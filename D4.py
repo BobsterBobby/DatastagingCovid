@@ -40,8 +40,8 @@ def DecisionTree(queryData):
     test_acc = DT.score(X_test,y_test)#get accuracy of test
 
     y_pred = DT.predict(X_test)
-    precision = precision_score(y_test, y_pred, average = 'micro')#get precision of test
-    recall = recall_score(y_test,y_pred, average = 'micro')#get recall of test
+    precision = precision_score(y_test, y_pred, average = 'macro')#get precision of test
+    recall = recall_score(y_test,y_pred, average = 'macro')#get recall of test
 
     """
     # Create Decision Tree classifer object
@@ -63,7 +63,6 @@ def DecisionTree(queryData):
     print("Precision Score: ", precision)
     print("Recall Score: ", recall)
     print("Total Elapsed Time in s: ", totalTime)
-
 
 # Gradient Boosting    
 def GradientBoosting(queryData):
@@ -87,8 +86,8 @@ def GradientBoosting(queryData):
     test_acc = GB.score(X_test,y_test)#get accuracy of test
 
     y_pred = GB.predict(X_test)
-    precision = precision_score(y_test, y_pred, average = 'micro')#get precision of test
-    recall = recall_score(y_test,y_pred, average = 'micro')#get recall of test
+    precision = precision_score(y_test, y_pred, average = 'macro')#get precision of test
+    recall = recall_score(y_test,y_pred, average = 'macro')#get recall of test
     
     print("Gradient Boosting Results\n========================")
     print("Training Accuracy: ", train_acc)
@@ -103,10 +102,6 @@ def RandomForest(queryData):
     y = queryData['resolved']
     X = queryData.drop(['resolved'], axis = 1)
     X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size = 0.20, random_state=0, stratify = y)
-    # stratSplit = StratifiedShuffleSplit(y, test_size=0.34, random_state=101)
-    # for train_id, test_id in stratSplit:
-    #     X_train=X[train_id]
-    #     y_train=y[train_id]
 
     print("\n========== Training Random Forest ==========\n")
     
@@ -121,8 +116,8 @@ def RandomForest(queryData):
     test_acc = randForest.score(X_test,y_test)#get accuracy of test
 
     y_pred = randForest.predict(X_test)
-    precision = precision_score(y_test, y_pred, average = 'micro')#get precision of test
-    recall = recall_score(y_test,y_pred, average = 'micro')#get recall of test
+    precision = precision_score(y_test, y_pred, average = 'macro')#get precision of test
+    recall = recall_score(y_test,y_pred, average = 'macro')#get recall of test
     
     print("Random Forest Results\n========================")
     print("Training Accuracy: ", train_acc)
